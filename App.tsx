@@ -44,7 +44,7 @@ const App: React.FC = () => {
             <Journal />
           )}
           {currentView === 'english' && (
-            <EnglishDaily />
+            <EnglishDaily userStats={userStats} onUpdateStats={setUserStats} />
           )}
         </div>
 

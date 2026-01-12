@@ -19,8 +19,9 @@ export interface JournalEntry {
 export interface EnglishArticle {
   title: string;
   content: string; // The full text
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-  vocabulary: { word: string; definition: string }[];
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced' | string; // Optional for manual import
+  vocabulary?: { word: string; definition: string }[]; // Optional for manual import
+  lastCompletedDate?: string; // ISO date string YYYY-MM-DD
 }
 
 export interface UserStats {
