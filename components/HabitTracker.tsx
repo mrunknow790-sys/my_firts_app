@@ -160,15 +160,16 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
                 </div>
               </div>
 
+              {/* 增大了按钮尺寸，添加了点击时的缩放效果 */}
               <button
                 onClick={() => toggleHabit(habit.id)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                className={`w-16 h-16 rounded-full flex items-center justify-center border-[3px] transition-all duration-300 shadow-sm active:scale-90 ${
                   isCompleted 
-                    ? 'bg-emerald-500 border-emerald-500 text-white scale-110' 
-                    : 'border-gray-200 text-gray-300 hover:border-emerald-400 hover:text-emerald-400'
+                    ? 'bg-emerald-500 border-emerald-500 text-white shadow-emerald-200' 
+                    : 'bg-white border-gray-200 text-gray-300 hover:border-emerald-400 hover:text-emerald-400 hover:shadow-md'
                 }`}
               >
-                <Check className={`w-6 h-6 ${isCompleted ? 'stroke-[3px]' : ''}`} />
+                <Check className={`w-8 h-8 ${isCompleted ? 'stroke-[4px]' : 'stroke-2'}`} />
               </button>
             </div>
           );
