@@ -14,14 +14,16 @@ const App: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-gray-900 font-sans selection:bg-emerald-200 selection:text-emerald-900">
+    // Updated container: Full screen on mobile, limited width on large screens
+    // Added pt-[var(--sat)] for top safe area (status bar/notch)
+    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-emerald-200 selection:text-emerald-900 pt-[var(--sat)]">
       
       {/* Main Content Area */}
-      <main className="max-w-md mx-auto min-h-screen bg-white sm:shadow-2xl sm:my-8 sm:rounded-[3rem] sm:min-h-[850px] relative overflow-hidden flex flex-col">
-        {/* Top Status Bar Decoration (Mobile Simulation) */}
-        <div className="h-6 w-full bg-white z-10 sticky top-0 sm:hidden"></div>
+      {/* Removed "mock phone" styling for mobile to ensure full-screen native feel */}
+      <main className="max-w-md mx-auto min-h-screen sm:min-h-[850px] relative overflow-hidden flex flex-col bg-white sm:my-8 sm:rounded-[3rem] sm:shadow-2xl sm:border sm:border-gray-100">
         
-        <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+        {/* Content View */}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32">
           {currentView === 'habits' && (
             <HabitTracker userStats={userStats} onUpdateStats={setUserStats} />
           )}
@@ -34,7 +36,8 @@ const App: React.FC = () => {
         </div>
 
         {/* Bottom Navigation */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 px-6 py-4 pb-8 sm:pb-6 z-20">
+        {/* Added pb-[var(--sab)] for bottom safe area (home indicator) */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-4 z-20 pb-[calc(1rem+var(--sab))] sm:pb-6">
           <nav className="flex justify-around items-center max-w-sm mx-auto bg-gray-900 rounded-full p-2 shadow-xl shadow-gray-200">
             
             <button
