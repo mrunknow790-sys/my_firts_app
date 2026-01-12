@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewState, UserStats } from './types';
 import HabitTracker from './components/HabitTracker';
 import Journal from './components/Journal';
@@ -6,12 +6,25 @@ import EnglishDaily from './components/EnglishDaily';
 import { ListTodo, BookHeart, GraduationCap } from 'lucide-react';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewState>('habits');
-  const [userStats, setUserStats] = useState<UserStats>({
-    xp: 0,
-    level: 1,
-    coins: 0
+  // Load initial state from localStorage if available
+  const [currentView, setCurrentView] = useState<ViewState>(() => {
+    const saved = localStorage.getItem('lifeup_view');
+    return (saved as ViewState) || 'habits';
   });
+
+  const [userStats, setUserStats] = useState<UserStats>(() => {
+    const saved = localStorage.getItem('lifeup_stats');
+    return saved ? JSON.parse(saved) : { xp: 0, level: 1, coins: 0 };
+  });
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    localStorage.setItem('lifeup_view', currentView);
+  }, [currentView]);
+
+  useEffect(() => {
+    localStorage.setItem('lifeup_stats', JSON.stringify(userStats));
+  }, [userStats]);
 
   return (
     // Updated container: Full screen on mobile, limited width on large screens

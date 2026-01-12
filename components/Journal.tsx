@@ -1,18 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { JournalEntry } from '../types';
 import { Save, Smile, Meh, Frown, Zap, Moon } from 'lucide-react';
 import { format } from 'date-fns';
 
 const Journal: React.FC = () => {
-  const [entries, setEntries] = useState<JournalEntry[]>([
-    {
+  const defaultEntry: JournalEntry = {
       id: '1',
       date: new Date(Date.now() - 86400000).toISOString(),
       content: '今天工作效率很高，早上的咖啡非常完美。',
       mood: 'happy',
       tags: ['工作', '咖啡']
-    }
-  ]);
+  };
+
+  const [entries, setEntries] = useState<JournalEntry[]>(() => {
+    const saved = localStorage.getItem('lifeup_journal');
+    return saved ? JSON.parse(saved) : [defaultEntry];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('lifeup_journal', JSON.stringify(entries));
+  }, [entries]);
+
   const [newEntry, setNewEntry] = useState('');
   const [selectedMood, setSelectedMood] = useState<JournalEntry['mood']>('neutral');
 

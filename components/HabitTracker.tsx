@@ -34,14 +34,25 @@ const generateICS = (habit: Habit) => {
 };
 
 const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats }) => {
-  const [habits, setHabits] = useState<Habit[]>([
-    { id: '1', name: '晨跑', icon: '🏃', color: 'bg-orange-100 text-orange-600', streak: 5, completedDates: [], reminderTime: '07:00' },
-    { id: '2', name: '喝水', icon: '💧', color: 'bg-blue-100 text-blue-600', streak: 12, completedDates: ['2023-10-26'] },
-    { id: '3', name: '阅读', icon: '📚', color: 'bg-purple-100 text-purple-600', streak: 2, completedDates: [] },
-  ]);
+  // Initial habits
+  const defaultHabits: Habit[] = [
+    { id: '1', name: '晨跑', icon: '🏃', color: 'bg-orange-100 text-orange-600', streak: 0, completedDates: [], reminderTime: '07:00' },
+    { id: '2', name: '喝水', icon: '💧', color: 'bg-blue-100 text-blue-600', streak: 0, completedDates: [] },
+    { id: '3', name: '阅读', icon: '📚', color: 'bg-purple-100 text-purple-600', streak: 0, completedDates: [] },
+  ];
+
+  // Load from localStorage
+  const [habits, setHabits] = useState<Habit[]>(() => {
+    const saved = localStorage.getItem('lifeup_habits');
+    return saved ? JSON.parse(saved) : defaultHabits;
+  });
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem('lifeup_habits', JSON.stringify(habits));
+  }, [habits]);
 
   const [showReward, setShowReward] = useState(false);
-
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const toggleHabit = (id: string) => {
