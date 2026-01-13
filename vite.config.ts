@@ -23,15 +23,15 @@ export default defineConfig({
         scope: ".",
         icons: [
           {
-            src: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
+            src: 'https://cdn-icons-png.flaticon.com/512/616/616490.png',
             sizes: '192x192',
-            type: 'image/png',
+            type: "image/png",
             purpose: 'any maskable'
           },
           {
-            src: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
+            src: 'https://cdn-icons-png.flaticon.com/512/616/616490.png',
             sizes: '512x512',
-            type: 'image/png',
+            type: "image/png",
             purpose: 'any maskable'
           }
         ]
