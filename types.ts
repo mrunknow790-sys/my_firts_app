@@ -25,6 +25,7 @@ export interface EnglishArticle {
 }
 
 export interface UserStats {
+  name: string; // Added user name
   xp: number;
   level: number;
   coins: number;
