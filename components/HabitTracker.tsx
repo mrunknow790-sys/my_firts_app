@@ -1,13 +1,36 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
 import { Habit, UserStats } from '../types';
-import { Check, Flame, Calendar as CalendarIcon, Bell, Plus, Trophy, Edit2, Trash2 } from 'lucide-react';
+import { Check, Flame, Calendar as CalendarIcon, Bell, Plus, Trophy, Edit2, Trash2, Sparkles, ShoppingBag, Gift, Coins } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface HabitTrackerProps {
   userStats: UserStats;
   onUpdateStats: (newStats: UserStats) => void;
 }
+
+// Sound Effect Utility using Web Audio API (No external file needed)
+const playSuccessSound = () => {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+  
+  const ctx = new AudioContext();
+  const oscillator = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(ctx.destination);
+  
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(500, ctx.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
+  
+  gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+  
+  oscillator.start(ctx.currentTime);
+  oscillator.stop(ctx.currentTime + 0.5);
+};
 
 // Helper to generate ICS file content
 const generateICS = (habit: Habit) => {
@@ -34,6 +57,19 @@ const generateICS = (habit: Habit) => {
   document.body.removeChild(link);
 };
 
+// Daily Quests Data
+const SIDE_QUESTS = [
+  "喝一杯温水，慢慢喝完",
+  "整理相册，删除3张废片",
+  "深呼吸一分钟",
+  "给一位老朋友发个表情包",
+  "看看窗外远处的风景",
+  "整理一下现在的桌面/房间",
+  "听一首你最喜欢的歌",
+  "做10个开合跳",
+  "夸奖自己一句"
+];
+
 const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats }) => {
   // Initial habits
   const defaultHabits: Habit[] = [
@@ -54,9 +90,17 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
   }, [habits]);
 
   const [showReward, setShowReward] = useState(false);
+  const [rewardMsg, setRewardMsg] = useState({ title: '', xp: 0 });
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(userStats.name || '进取者');
+  const [showShop, setShowShop] = useState(false);
+  
   const today = format(new Date(), 'yyyy-MM-dd');
+
+  // Determine today's quest based on date hash to keep it consistent for the day
+  const questIndex = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % SIDE_QUESTS.length;
+  const todaysQuest = SIDE_QUESTS[questIndex];
+  const isQuestDone = userStats.lastSideQuestDate === today;
 
   // Long press logic ref
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -73,6 +117,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
         let newStreak = h.streak;
         if (!isCompleted) {
             newStreak += 1;
+            playSuccessSound();
             // Trigger reward
             onUpdateStats({
                 ...userStats,
@@ -80,6 +125,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
                 coins: userStats.coins + 10,
                 level: Math.floor((userStats.xp + 20) / 100) + 1
             });
+            setRewardMsg({ title: '继续保持！', xp: 20 });
             setShowReward(true);
             setTimeout(() => setShowReward(false), 2000);
         } else {
@@ -94,6 +140,43 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
       }
       return h;
     }));
+  };
+
+  const completeSideQuest = () => {
+    if (isQuestDone) return;
+    playSuccessSound();
+    onUpdateStats({
+      ...userStats,
+      xp: userStats.xp + 30,
+      coins: userStats.coins + 15,
+      lastSideQuestDate: today,
+      level: Math.floor((userStats.xp + 30) / 100) + 1
+    });
+    setRewardMsg({ title: '支线任务完成！', xp: 30 });
+    setShowReward(true);
+    setTimeout(() => setShowReward(false), 2000);
+  };
+
+  const buyMysteryBox = () => {
+    if (userStats.coins < 50) {
+      alert("金币不足！需要50金币。多打卡赚取金币吧！");
+      return;
+    }
+    
+    playSuccessSound();
+    // Random reward logic
+    const randomXP = Math.floor(Math.random() * 100) + 20; // 20 to 120 XP
+    
+    onUpdateStats({
+      ...userStats,
+      coins: userStats.coins - 50,
+      xp: userStats.xp + randomXP,
+      level: Math.floor((userStats.xp + randomXP) / 100) + 1
+    });
+
+    setRewardMsg({ title: '开启神秘宝箱！', xp: randomXP });
+    setShowReward(true);
+    setTimeout(() => setShowReward(false), 3000);
   };
 
   const handleNameSave = () => {
@@ -141,7 +224,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
   };
 
   return (
-    <div className="space-y-6 pb-24 animate-in fade-in duration-500">
+    <div className="space-y-6 pb-24 animate-in fade-in duration-500 relative">
       {/* Header & Stats */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
         <div className="flex justify-between items-center mb-4">
@@ -165,9 +248,18 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
                 <Edit2 className="w-4 h-4 text-gray-300 group-hover:text-gray-500 opacity-0 group-hover:opacity-100 transition-all" />
               </h2>
             )}
-            <p className="text-gray-500 text-sm">今天也要加油哦。</p>
+            <div className="flex items-center gap-3 text-sm mt-1">
+               <span className="text-gray-500">今天也要加油哦。</span>
+               <button 
+                 onClick={() => setShowShop(!showShop)}
+                 className="flex items-center gap-1 text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full border border-yellow-100 font-bold active:scale-95 transition-transform"
+               >
+                 <Coins className="w-3 h-3" />
+                 {userStats.coins}
+               </button>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-100">
+          <div className="flex items-center space-x-2 bg-gradient-to-r from-yellow-50 to-orange-50 px-3 py-1 rounded-full border border-yellow-100 shadow-sm">
             <Trophy className="w-4 h-4 text-yellow-500" />
             <span className="font-bold text-yellow-700">Lv {userStats.level}</span>
           </div>
@@ -183,6 +275,59 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
             className="h-full bg-yellow-400 transition-all duration-500 ease-out"
             style={{ width: `${userStats.xp % 100}%` }}
           />
+        </div>
+      </div>
+
+      {/* Shop Area (Collapsible) */}
+      {showShop && (
+        <div className="bg-yellow-50 rounded-3xl p-5 border border-yellow-200 animate-in slide-in-from-top-2">
+            <div className="flex justify-between items-center mb-3">
+                <h3 className="font-bold text-yellow-800 flex items-center gap-2">
+                    <ShoppingBag className="w-5 h-5" /> 积分商店
+                </h3>
+                <span className="text-xs text-yellow-600">花掉你的金币！</span>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+                <button 
+                    onClick={buyMysteryBox}
+                    className="flex-shrink-0 bg-white p-3 rounded-xl border-2 border-yellow-200 w-32 flex flex-col items-center gap-2 active:scale-95 transition-transform shadow-sm"
+                >
+                    <Gift className="w-8 h-8 text-purple-500" />
+                    <div className="text-center">
+                        <div className="font-bold text-sm text-gray-800">神秘宝箱</div>
+                        <div className="text-xs text-yellow-600 font-bold">50 金币</div>
+                    </div>
+                </button>
+                {/* Placeholder for future items */}
+                <div className="flex-shrink-0 bg-white/50 p-3 rounded-xl border-2 border-dashed border-yellow-200 w-32 flex flex-col items-center justify-center gap-2">
+                    <span className="text-xs text-gray-400">敬请期待</span>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* Side Quest Card */}
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-1 shadow-lg text-white">
+        <div className="bg-white/10 backdrop-blur-sm p-4 rounded-[1.3rem] flex items-center justify-between">
+           <div>
+              <div className="flex items-center gap-2 text-xs font-bold text-indigo-100 uppercase tracking-wider mb-1">
+                 <Sparkles className="w-3 h-3" /> 每日支线任务
+              </div>
+              <div className={`font-medium transition-all ${isQuestDone ? 'line-through opacity-60' : ''}`}>
+                 {todaysQuest}
+              </div>
+           </div>
+           <button 
+             onClick={completeSideQuest}
+             disabled={isQuestDone}
+             className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                isQuestDone 
+                ? 'bg-white/20 text-white cursor-default' 
+                : 'bg-white text-indigo-600 shadow-md hover:scale-110 active:scale-90'
+             }`}
+           >
+             {isQuestDone ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+           </button>
         </div>
       </div>
 
@@ -227,7 +372,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
                 </div>
               </div>
 
-              {/* Reminder Button (Stop propagation to prevent long-press issues) */}
+              {/* Reminder Button */}
               {habit.reminderTime && (
                 <button 
                   onClick={(e) => { e.stopPropagation(); generateICS(habit); }}
@@ -238,7 +383,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
                 </button>
               )}
 
-              {/* Check Button (Stop propagation to prevent long-press triggers while clicking) */}
+              {/* Check Button */}
               <button
                 onClick={(e) => { e.stopPropagation(); toggleHabit(habit.id); }}
                 className={`relative z-10 w-16 h-16 rounded-full flex items-center justify-center border-[3px] transition-all duration-300 shadow-sm active:scale-90 ${
@@ -266,13 +411,13 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ userStats, onUpdateStats })
         <Plus className="w-5 h-5" /> 添加新习惯
       </button>
 
-      {/* Simplified Reward Modal */}
+      {/* Reward Modal */}
       {showReward && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
             <div className="bg-white/90 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-yellow-200 animate-bounce text-center">
                 <div className="text-4xl mb-2">🎉</div>
-                <div className="font-bold text-xl text-gray-800">继续保持！</div>
-                <div className="text-yellow-600 font-bold">+20 经验值</div>
+                <div className="font-bold text-xl text-gray-800">{rewardMsg.title}</div>
+                <div className="text-yellow-600 font-bold">+{rewardMsg.xp} 经验值</div>
             </div>
         </div>
       )}
