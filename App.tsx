@@ -27,14 +27,20 @@ const App: React.FC = () => {
     localStorage.setItem('lifeup_stats', JSON.stringify(userStats));
   }, [userStats]);
 
+  const handleNavClick = (view: ViewState) => {
+    setCurrentView(view);
+    if (window.navigator.vibrate) {
+      window.navigator.vibrate(10); // Light haptic feedback
+    }
+  };
+
   return (
-    // Updated container: Fixed height (h-screen) to prevent window scrolling
-    // Added pt-[var(--sat)] for top safe area
-    <div className="h-screen overflow-hidden bg-white text-gray-900 font-sans selection:bg-emerald-200 selection:text-emerald-900 pt-[var(--sat)] flex flex-col">
+    // Updated container: Fixed height (h-screen)
+    // NEW: Added a premium gradient background (Aurora style)
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-emerald-50 text-gray-900 font-sans selection:bg-emerald-200 selection:text-emerald-900 pt-[var(--sat)] flex flex-col">
       
       {/* Main Content Area */}
-      {/* Changed to h-full relative to maintain layout integrity */}
-      <main className="max-w-md mx-auto w-full h-full relative flex flex-col bg-white sm:my-8 sm:h-[850px] sm:rounded-[3rem] sm:shadow-2xl sm:border sm:border-gray-100 overflow-hidden">
+      <main className="max-w-md mx-auto w-full h-full relative flex flex-col sm:my-8 sm:h-[850px] sm:rounded-[3rem] sm:shadow-2xl sm:border sm:border-gray-100 overflow-hidden bg-white/50 backdrop-blur-sm sm:bg-white">
         
         {/* Content View - Scrollable Area */}
         <div className="flex-1 overflow-y-auto no-scrollbar p-6 pb-32">
@@ -50,12 +56,11 @@ const App: React.FC = () => {
         </div>
 
         {/* Bottom Navigation - Fixed within the flex container */}
-        {/* Removed 'absolute bottom-0' reliance on relative parent height quirks */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-6 py-4 z-20 pb-[calc(1rem+var(--sab))] sm:pb-6">
-          <nav className="flex justify-around items-center max-w-sm mx-auto bg-gray-900 rounded-full p-2 shadow-xl shadow-gray-200">
+        <div className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-100/50 px-6 py-4 z-20 pb-[calc(1rem+var(--sab))] sm:pb-6">
+          <nav className="flex justify-around items-center max-w-sm mx-auto bg-gray-900/95 rounded-full p-2 shadow-xl shadow-gray-200">
             
             <button
-              onClick={() => setCurrentView('habits')}
+              onClick={() => handleNavClick('habits')}
               className={`relative flex items-center justify-center w-14 h-14 rounded-full transition-all duration-300 ${
                 currentView === 'habits' 
                   ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 -translate-y-4' 
@@ -71,7 +76,7 @@ const App: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setCurrentView('journal')}
+              onClick={() => handleNavClick('journal')}
               className={`relative flex items-center justify-center w-14 h-14 rounded-full transition-all duration-300 ${
                 currentView === 'journal' 
                   ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30 -translate-y-4' 
@@ -87,7 +92,7 @@ const App: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setCurrentView('english')}
+              onClick={() => handleNavClick('english')}
               className={`relative flex items-center justify-center w-14 h-14 rounded-full transition-all duration-300 ${
                 currentView === 'english' 
                   ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30 -translate-y-4' 
