@@ -29,6 +29,7 @@ export interface UserStats {
   xp: number;
   level: number;
   coins: number;
+  lastSideQuestDate?: string; // Track when the daily side quest was completed
 }
 
 export type ViewState = 'habits' | 'journal' | 'english';
