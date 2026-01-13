@@ -71,7 +71,7 @@ const Journal: React.FC = () => {
           className="w-full h-32 p-4 bg-gray-50 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-all text-gray-700 placeholder-gray-400"
           placeholder="今天发生了什么？"
           value={newEntry}
-          onChange={(e) => setNewEntry(e.target.value)}
+          onChange={(e) => setNewEntry((e.target as HTMLTextAreaElement).value)}
         />
         
         <div className="flex justify-between items-center mt-4">
