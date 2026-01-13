@@ -194,13 +194,13 @@ const EnglishDaily: React.FC<EnglishDailyProps> = ({ userStats, onUpdateStats })
                   type="text" 
                   placeholder="文章标题（可选）"
                   value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
+                  onChange={(e) => setEditTitle((e.target as HTMLInputElement).value)}
                   className="w-full p-3 bg-gray-50 rounded-xl border-none focus:ring-2 focus:ring-emerald-100 outline-none font-bold text-gray-800"
                 />
                 <textarea 
                   placeholder="在此输入或粘贴英文内容..."
                   value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
+                  onChange={(e) => setEditContent((e.target as HTMLTextAreaElement).value)}
                   className="w-full h-48 p-4 bg-gray-50 rounded-xl resize-none border-none focus:ring-2 focus:ring-emerald-100 outline-none text-gray-700 leading-relaxed"
                 />
                 <div className="flex gap-3">
